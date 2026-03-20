@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body style="background-color: #ffe6f2; margin: 0; padding: 0; overflow: hidden; font-family: 'Arial', sans-serif;">
+
+    <!-- 中心告白内容 -->
+    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; z-index: 10;">
+        <h1 style="color: #d63384; font-size: 3.5rem; text-shadow: 2px 2px 4px rgba(255, 192, 203, 0.8); margin-bottom: 20px;">
+            徐鑫晨，我喜欢你！
+        </h1>
+        <p style="color: #c2185b; font-size: 1.5rem; background: rgba(255, 255, 255, 0.6); padding: 20px; border-radius: 15px; display: inline-block;">
+            愿我们的故事像草莓熊一样甜美温暖 🧸🍓
+        </p>
+    </div>
+
+    <!-- 飘落的草莓熊容器 -->
+    <div id="strawberry-bears-container"></div>
+
+    <script>
+        (function() {
+            const container = document.getElementById('strawberry-bears-container');
+            const bearEmojis = ['🧸', '🍓', '🌸', '💖']; // 使用 emoji 模拟草莓熊元素
+            
+            function createBear() {
+                const bear = document.createElement('div');
+                bear.innerText = bearEmojis[Math.floor(Math.random() * bearEmojis.length)];
+                bear.style.position = 'absolute';
+                bear.style.left = Math.random() * 100 + 'vw';
+                bear.style.top = '-50px';
+                bear.style.fontSize = (Math.random() * 20 + 20) + 'px';
+                bear.style.opacity = Math.random() * 0.7 + 0.3;
+                bear.style.transform = `rotate(${Math.random() * 360}deg)`;
+                bear.style.transition = 'top 4s linear, opacity 4s ease-in';
+                
+                container.appendChild(bear);
+
+                // 动画下落
+                setTimeout(() => {
+                    bear.style.top = '110vh';
+                    bear.style.opacity = '0';
+                }, 100);
+
+                // 移除元素
+                setTimeout(() => {
+                    bear.remove();
+                }, 4100);
+            }
+
+            // 持续生成飘落的元素
+            setInterval(createBear, 300);
+        })();
+    </script>
+</body>
+</html>
