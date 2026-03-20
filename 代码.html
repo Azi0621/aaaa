@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body style="margin: 0; padding: 0; overflow: hidden; font-family: 'Microsoft YaHei', sans-serif;">
+    <!-- 第一页：粉色封面 -->
+    <div id="page1" style="width: 100vw; height: 100vh; background: linear-gradient(135deg, #ffc0cb, #ff69b4); display: flex; flex-direction: column; justify-content: center; align-items: center; position: absolute; top: 0; left: 0; z-index: 10;">
+        <h1 style="color: #fff; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); font-size: 2.5rem; text-align: center; margin-bottom: 40px;">徐鑫晨做我的黏人小狗吧</h1>
+        <div style="display: flex; gap: 20px;">
+            <button id="btnNo" style="padding: 15px 30px; font-size: 1.2rem; background: #fff; color: #ff69b4; border: none; border-radius: 25px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: transform 0.2s;">不愿意</button>
+            <button id="btnYes" style="padding: 15px 30px; font-size: 1.2rem; background: #ff1493; color: #fff; border: none; border-radius: 25px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.2); transition: transform 0.2s;">愿意</button>
+        </div>
+    </div>
+
+    <!-- 第二页：黑金背景动态爱心 -->
+    <div id="page2" style="width: 100vw; height: 100vh; background: radial-gradient(circle, #2b2b2b, #000); display: none; position: relative; overflow: hidden;">
+        <canvas id="heartCanvas" style="position: absolute; top: 0; left: 0;"></canvas>
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #ffd700; font-size: 2rem; text-shadow: 0 0 10px #ffd700; opacity: 0.8; pointer-events: none;">
+            ❤️ 永远爱你 ❤️
+        </div>
+    </div>
+
+    <script>
+        // 页面切换逻辑
+        const btnNo = document.getElementById('btnNo');
+        const btnYes = document.getElementById('btnYes');
+        const page1 = document.getElementById('page1');
+        const page2 = document.getElementById('page2');
+
+        btnNo.addEventListener('click', () => {
+            alert('撤销，必须愿意');
+        });
+
+        btnYes.addEventListener('click', () => {
+            page1.style.display = 'none';
+            page2.style.display = 'block';
+            initHeartAnimation();
+        });
+
+        // 动态爱心花瓣逻辑
+        function initHeartAnimation() {
+            const canvas = document.getElementById('heartCanvas');
+            const ctx = canvas.getContext('2d');
+            let width, height;
+
+            function resize() {
+                width = canvas.width = window.innerWidth;
+                height = canvas.height = window.innerHeight;
+            }
+            resize();
+            window.addEventListener('resize', resize);
+
+            const particles = [];
+            const heartCenter = { x: width / 2, y: height / 2 };
+            const heartSize = Math.min(width, height) * 0.4;
+
+            // 心形公式
+            function getHeartPoint(t) {
+                const x = 16 * Math.pow(Math.sin(t), 3);
+                const y = -(13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t));
+                return {
+                    x: heartCenter.x + x * (heartSize / 20),
+                    y: heartCenter.y + y * (heartSize / 20)
+                };
+            }
+
+            class Petal {
+                constructor() {
+                    this.reset();
+                    this.y = heartCenter.y; // 初始从中心开始
+                    this.x = heartCenter.x;
+                    this.life = 0;
+                    this.maxLife = 200 + Math.random() * 100;
+                }
+
+                reset() {
+                    const t = Math.random() * Math.PI * 2;
+                    const pos = getHeartPoint(t);
+                    this.x = pos.x;
+                    this.y = pos.y;
+                    this.size = 5 + Math.random() * 15;
+                    this.speedX = (Math.random() - 0.5) * 2;
+                    this.speedY = 1 + Math.random() * 2;
+                    this.rotation = Math.random() * Math.PI * 2;
+                    this.rotationSpeed = (Math.random() - 0.5) * 0.1;
+                    this.type = Math.random() > 0.7 ? 'rose' : 'petal'; // 30% 概率是玫瑰花
+                    this.opacity = 1;
+                    this.trail = [];
+                }
+
+                update() {
+                    this.trail.push({x: this.x, y: this.y, alpha: this.opacity});
+                    if (this.trail.length > 10) this.trail.shift();
+
+                    this.x += this.speedX;
+                    this.y += this.speedY;
+                    this.rotation += this.rotationSpeed;
+                    this.life++;
+                    
+                    // 模拟风吹效果
+                    this.speedX += Math.sin(this.life * 0.05) * 0.05;
+
+                    if (this.y > height + 50 || this.life > this.maxLife) {
+                        this.reset();
+                    }
+                }
+
+                draw() {
+                    // 绘制拖尾
+                    for (let i = 0; i < this.trail.length; i++) {
+                        const point = this.trail[i];
+                        const trailAlpha = (i / this.trail.length) * 0.5 * this.opacity;
+                        ctx.beginPath();
+                        ctx.arc(point.x, point.y, this.size * 0.3, 0, Math.PI * 2);
+                        ctx.fillStyle = `rgba(255, 105, 180, ${trailAlpha})`;
+                        ctx.fill();
+                    }
+
+                    ctx.save();
+                    ctx.translate(this.x, this.y);
+                    ctx.rotate(this.rotation);
+                    ctx.globalAlpha = this.opacity;
+
+                    if (this.type === 'rose') {
+                        // 绘制简易玫瑰花图案
+                        const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, this.size);
+                        gradient.addColorStop(0, '#ff69b4');
+                        gradient.addColorStop(0.5, '#ff1493');
+                        gradient.addColorStop(1, '#c71585');
+                        ctx.fillStyle = gradient;
+                        
+                        ctx.beginPath();
+                        for (let i = 0; i < 5; i++) {
+                            const angle = (i / 5) * Math.PI * 2;
+                            const px = Math.cos(angle) * this.size;
+                            const py = Math.sin(angle) * this.size;
+                            ctx.moveTo(0, 0);
+                            ctx.quadraticCurveTo(px/2, py/2, px, py);
+                            ctx.quadraticCurveTo(px/2, py/2, 0, 0);
+                        }
+                        ctx.fill();
+                        
+                        // 发光效果
+                        ctx.shadowColor = '#ff69b4';
+                        ctx.shadowBlur = 15;
+                        ctx.stroke();
+                    } else {
+                        // 绘制花瓣
+                        const gradient = ctx.createLinearGradient(-this.size, -this.size, this.size, this.size);
+                        gradient.addColorStop(0, '#ffb6c1');
+                        gradient.addColorStop(1, '#ff69b4');
+                        ctx.fillStyle = gradient;
+                        
+                        ctx.beginPath();
+                        ctx.moveTo(0, 0);
+                        ctx.bezierCurveTo(this.size/2, -this.size, this.size, -this.size/2, 0, this.size);
+                        ctx.bezierCurveTo(-this.size, -this.size/2, -this.size/2, -this.size, 0, 0);
+                        ctx.fill();
+
+                        // 发光效果
+                        ctx.shadowColor = '#ffb6c1';
+                        ctx.shadowBlur = 10;
+                    }
+
+                    ctx.restore();
+                }
+            }
+
+            // 初始化粒子
+            for (let i = 0; i < 150; i++) {
+                particles.push(new Petal());
+            }
+
+            function animate() {
+                ctx.clearRect(0, 0, width, height);
+                
+                // 绘制背景光晕
+                const bgGradient = ctx.createRadialGradient(heartCenter.x, heartCenter.y, 0, heartCenter.x, heartCenter.y, heartSize * 1.5);
+                bgGradient.addColorStop(0, 'rgba(255, 20, 147, 0.1)');
+                bgGradient.addColorStop(1, 'transparent');
+                ctx.fillStyle = bgGradient;
+                ctx.fillRect(0, 0, width, height);
+
+                particles.forEach(petal => {
+                    petal.update();
+                    petal.draw();
+                });
+
+                requestAnimationFrame(animate);
+            }
+
+            animate();
+        }
+    </script>
+</body>
+</html>
