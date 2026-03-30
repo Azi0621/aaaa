@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body style="background-color: #ffe6f2; font-family: 'Arial', sans-serif; margin: 0; padding: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh;">
+    <header style="background-color: #ff66b2; color: white; width: 100%; text-align: center; padding: 20px 0; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        <h1 style="margin: 0; font-size: 2.5em;">🌸 粉色互动乐园 🌸</h1>
+        <p style="margin: 10px 0 0; font-size: 1.2em;">点击按钮开始游戏！</p>
+    </header>
+
+    <main style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; width: 100%; max-width: 800px;">
+        <div id="game-area" style="background-color: white; border-radius: 15px; padding: 30px; box-shadow: 0 8px 16px rgba(255, 105, 180, 0.2); text-align: center; width: 100%;">
+            <h2 id="game-title" style="color: #ff66b2; margin-top: 0;">猜数字游戏</h2>
+            <p id="game-description">我想了一个 1 到 100 之间的数字，你能猜出来吗？</p>
+            
+            <div style="margin: 20px 0;">
+                <input type="number" id="guess-input" placeholder="输入你的猜测" 
+                       style="padding: 12px; border: 2px solid #ffb3d9; border-radius: 8px; font-size: 16px; width: 200px; outline: none;">
+                <button id="guess-btn" onclick="checkGuess()" 
+                        style="background-color: #ff66b2; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 16px; cursor: pointer; margin-left: 10px; transition: background-color 0.3s;">
+                    猜一下
+                </button>
+            </div>
+            
+            <div id="feedback" style="min-height: 30px; font-weight: bold; color: #ff3385; margin: 15px 0;"></div>
+            
+            <button id="restart-btn" onclick="initGame()" 
+                    style="background-color: #ff99cc; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-size: 14px; cursor: pointer; display: none; margin-top: 10px;">
+                再玩一次
+            </button>
+        </div>
+        
+        <div style="margin-top: 30px; text-align: center;">
+            <h3 style="color: #ff66b2;">其他游戏即将上线...</h3>
+            <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+                <button class="game-selector" onclick="selectGame('memory')" 
+                        style="background-color: #ffb3d9; color: white; border: none; padding: 10px 15px; border-radius: 20px; cursor: pointer;">
+                    记忆挑战
+                </button>
+                <button class="game-selector" onclick="selectGame('clicker')" 
+                        style="background-color: #ffb3d9; color: white; border: none; padding: 10px 15px; border-radius: 20px; cursor: pointer;">
+                    快速点击
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <footer style="background-color: #ff66b2; color: white; width: 100%; text-align: center; padding: 15px 0; margin-top: auto;">
+        <p style="margin: 0;">© 2023 粉色互动乐园 | 用爱制作 💖</p>
+    </footer>
+
+    <script>
+        let targetNumber;
+        let attempts = 0;
+        const maxAttempts = 10;
+
+        function initGame() {
+            targetNumber = Math.floor(Math.random() * 100) + 1;
+            attempts = 0;
+            document.getElementById('feedback').textContent = '';
+            document.getElementById('guess-input').value = '';
+            document.getElementById('guess-input').disabled = false;
+            document.getElementById('guess-btn').disabled = false;
+            document.getElementById('restart-btn').style.display = 'none';
+            document.getElementById('game-description').textContent = `我想了一个 1 到 100 之间的数字，你还有 ${maxAttempts} 次机会！`;
+        }
+
+        function checkGuess() {
+            const userGuess = parseInt(document.getElementById('guess-input').value);
+            const feedbackEl = document.getElementById('feedback');
+            
+            if (isNaN(userGuess) || userGuess < 1 || userGuess > 100) {
+                feedbackEl.textContent = '请输入 1 到 100 之间的有效数字！';
+                return;
+            }
+            
+            attempts++;
+            const remaining = maxAttempts - attempts;
+            
+            if (userGuess === targetNumber) {
+                feedbackEl.textContent = `🎉 恭喜你！猜对了！答案就是 ${targetNumber}。你用了 ${attempts} 次尝试。`;
+                endGame(true);
+            } else if (remaining === 0) {
+                feedbackEl.textContent = `😢 很遗憾，机会用完了。正确答案是 ${targetNumber}。`;
+                endGame(false);
+            } else {
+                const hint = userGuess < targetNumber ? '太小了' : '太大了';
+                feedbackEl.textContent = `${hint}！你还剩 ${remaining} 次机会。`;
+                document.getElementById('guess-input').value = '';
+                document.getElementById('guess-input').focus();
+            }
+        }
+
+        function endGame(win) {
+            document.getElementById('guess-input').disabled = true;
+            document.getElementById('guess-btn').disabled = true;
+            document.getElementById('restart-btn').style.display = 'inline-block';
+            
+            // 添加庆祝动画效果
+            if (win) {
+                document.getElementById('game-area').style.animation = 'pulse 0.5s 3';
+            }
+        }
+
+        function selectGame(gameType) {
+            alert('游戏 "' + gameType + '" 即将推出！敬请期待～');
+        }
+
+        // 初始化游戏
+        window.onload = initGame;
+
+        // 添加简单的脉冲动画
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes pulse {
+                0% { transform: scale(1); }
+                50% { transform: scale(1.05); }
+                100% { transform: scale(1); }
+            }
+            button:hover {
+                opacity: 0.9;
+                transform: translateY(-2px);
+            }
+            input:focus {
+                border-color: #ff66b2;
+                box-shadow: 0 0 8px rgba(255, 102, 178, 0.3);
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
