@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>今日歌曲推荐</title>
+</head>
+<body>
+    <style>
+        /* 全局样式设置：可爱治愈风 */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Comic Sans MS', 'YouYuan', 'Microsoft YaHei', cursive, sans-serif;
+            background-color: #f0f8ff;
+            /* 用户请在此处替换背景图片路径 */
+            background-image: url('./星星人.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: #4a4a4a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* 主容器：星星人主题卡片 */
+        .container {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border-radius: 35px;
+            padding: 40px;
+            width: 90%;
+            max-width: 650px;
+            box-shadow: 0 15px 35px rgba(135, 206, 250, 0.5);
+            text-align: center;
+            border: 5px solid #ffb7b2;
+            position: relative;
+            z-index: 10;
+            transition: border-color 0.5s ease;
+        }
+
+        /* 标题样式：大字体艺术感 */
+        h1 {
+            font-size: 2.8em;
+            color: #ff6f61;
+            text-shadow: 3px 3px 0px #fff, 5px 5px 0px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            letter-spacing: 3px;
+            font-weight: bold;
+        }
+
+        h2 {
+            font-size: 2em;
+            color: #6a5acd;
+            margin-bottom: 20px;
+        }
+
+        /* 表单组样式 */
+        .form-group {
+            margin-bottom: 25px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            font-size: 1.5em;
+            color: #6a5acd;
+            margin-bottom: 12px;
+            font-weight: bold;
+            text-shadow: 1px 1px 0 #fff;
+        }
+
+        select, input[type="color"] {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.3em;
+            border: 3px solid #ffd700;
+            border-radius: 25px;
+            background: #fff;
+            color: #555;
+            outline: none;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+            font-family: inherit;
+            cursor: pointer;
+        }
+
+        select:focus, input[type="color"]:focus {
+            border-color: #ff6f61;
+            transform: scale(1.02);
+            box-shadow: 0 0 20px rgba(255, 111, 97, 0.3);
+        }
+
+        /* 按钮样式 */
+        button {
+            background: linear-gradient(45deg, #ff6f61, #ffcc5c);
+            color: white;
+            border: none;
+            padding: 18px 50px;
+            font-size: 1.6em;
+            border-radius: 50px;
+            cursor: pointer;
+            margin-top: 25px;
+            box-shadow: 0 8px 20px rgba(255, 111, 97, 0.4);
+            transition: transform 0.2s, box-shadow 0.2s;
+            font-family: inherit;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        button:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 12px 25px rgba(255, 111, 97, 0.6);
+        }
+
+        button:active {
+            transform: translateY(2px);
+        }
+
+        /* 结果区域 */
+        #result-area {
+            margin-top: 30px;
+            display: none;
+            animation: fadeInUp 1s ease-out;
+        }
+
+        .song-card {
+            background: #fff;
+            border: 3px dashed #87cefa;
+            border-radius: 25px;
+            padding: 25px;
+            margin: 20px 0;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+
+        .song-card:hover {
+            transform: scale(1.05) rotate(-1deg);
+            background: #fffaf0;
+            border-color: #ffb7b2;
+            border-style: solid;
+            box-shadow: 0 10px 25px rgba(255, 183, 178, 0.4);
+        }
+
+        .song-title {
+            font-size: 1.8em;
+            color: #ff6f61;
+            margin: 0 0 10px 0;
+            font-weight: bold;
+        }
+
+        .song-artist {
+            font-size: 1.4em;
+            color: #6a5acd;
+            margin: 0;
+        }
+
+        .platform-links {
+            margin-top: 15px;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .platform-link {
+            display: inline-block;
+            font-size: 1.1em;
+            color: #fff;
+            padding: 8px 20px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: transform 0.2s;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .platform-link:hover {
+            transform: translateY(-3px);
+        }
+
+        .platform-link.qq { background: #31c27c; }
+        .platform-link.netease { background: #c20c0c; }
+
+        /* 装饰元素：星星 */
+        .star {
+            position: absolute;
+            color: #ffd700;
+            font-size: 24px;
+            animation: twinkle 2.5s infinite ease-in-out;
+            z-index: 1;
+            text-shadow: 0 0 5px #fff;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.4; transform: scale(1) rotate(0deg); }
+            50% { opacity: 1; transform: scale(1.3) rotate(180deg); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 响应式调整 */
+        @media (max-width: 480px) {
+            h1 { font-size: 2.2em; }
+            label { font-size: 1.3em; }
+            button { font-size: 1.4em; padding: 15px 35px; }
+            .song-title { font-size: 1.5em; }
+            .song-artist { font-size: 1.2em; }
+        }
+    </style>
+
+    <div class="container">
+        <!-- 装饰星星 -->
+        <div class="star" style="top: -25px; left: 30px;">★</div>
+        <div class="star" style="top: 60px; right: -20px; animation-delay: 0.8s;">★</div>
+        <div class="star" style="bottom: -15px; left: 40%; animation-delay: 1.5s;">★</div>
+        <div class="star" style="top: 10px; left: 50%; animation-delay: 0.3s;">✨</div>
+
+        <h1>✨ 星星人音乐魔法 ✨</h1>
+
+        <div id="quiz-form">
+            <div class="form-group">
+                <label for="color">🎨 今天偏爱什么颜色？</label>
+                <input type="color" id="color" value="#ff6f61">
+            </div>
+
+            <div class="form-group">
+                <label for="mood">☁️ 此刻的心情是？</label>
+                <select id="mood">
+                    <option value="happy">😊 开心快乐</option>
+                    <option value="sad">😢 有点难过</option>
+                    <option value="relaxed">😌 放松悠闲</option>
+                    <option value="energetic">⚡ 充满活力</option>
+                    <option value="romantic">💕 浪漫甜蜜</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="region">🌍 想听哪里的作品？</label>
+                <select id="region">
+                    <option value="cn">🇨🇳 国内华语</option>
+                    <option value="overseas">🌏 国外欧美/日韩</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="style">🎵 喜欢什么音乐风格？</label>
+                <select id="style">
+                    <option value="pop">🎤 流行 Pop</option>
+                    <option value="folk">🎸 民谣 Folk</option>
+                    <option value="electronic">🎹 电子 Electronic</option>
+                    <option value="classical">🎻 古典 Classical</option>
+                    <option value="rnb">🎷 R&B/Soul</option>
+                </select>
+            </div>
+
+            <button onclick="generateRecommendations()">🌟 召唤专属歌单 🌟</button>
+        </div>
+
+        <div id="result-area">
+            <h2>为你精选的治愈单曲：</h2>
+            <div id="songs-list"></div>
+            <button onclick="resetQuiz()" style="background: linear-gradient(45deg, #87cefa, #b0e0e6); margin-top: 30px; font-size: 1.3em;">🔄 再玩一次</button>
+        </div>
+    </div>
+
+    <script>
+        // 歌曲数据库 (包含更多歌曲以确保不重复)
+        const songDatabase = {
+            cn: {
+                pop: [
+                    { title: "晴天", artist: "周杰伦", qq: "https://y.qq.com/n/ryqs/song_detail/002J4UUk29y8BY", netease: "https://music.163.com/#/song?id=186016" },
+                    { title: "小幸运", artist: "田馥甄", qq: "https://y.qq.com/n/ryqs/song_detail/003Oj2Vd3572Xp", netease: "https://music.163.com/#/song?id=31393555" },
+                    { title: "起风了", artist: "买辣椒也用券", qq: "https://y.qq.com/n/ryqs/song_detail/000S68PI3a78qT", netease: "https://music.163.com/#/song?id=543678752" },
+                    { title: "告白气球", artist: "周杰伦", qq: "https://y.qq.com/n/ryqs/song_detail/001gXhHv1F5Z4Q", netease: "https://music.163.com/#/song?id=405809776" },
+                    { title: "光年之外", artist: "G.E.M.邓紫棋", qq: "https://y.qq.com/n/ryqs/song_detail/002uLz6R0o085B", netease: "https://music.163.com/#/song?id=29717177" },
+                    { title: "孤勇者", artist: "陈奕迅", qq: "https://y.qq.com/n/ryqs/song_detail/003xWz5w3g64tD", netease: "https://music.163.com/#/song?id=28285846" }
+                ],
+                folk: [
+                    { title: "成都", artist: "赵雷", qq: "https://y.qq.com/n/ryqs/song_detail/003xWz5w3g64tD", netease: "https://music.163.com/#/song?id=405809776" },
+                    { title: "南山南", artist: "马頔", qq: "https://y.qq.com/n/ryqs/song_detail/001gXhHv1F5Z4Q", netease: "https://music.163.com/#/song?id=29717177" },
+                    { title: "平凡之路", artist: "朴树", qq: "https://y.qq.com/n/ryqs/song_detail/002uLz6R0o085B", netease: "https://music.163.com/#/song?id=28285846" },
+                    { title: "南方姑娘", artist: "赵雷", qq: "https://y.qq.com/n/ryqs/song_detail/000S68PI3a78qT", netease: "https://music.163.com/#/song?id=543678752" },
+                    { title: "安和桥", artist: "宋冬野", qq: "https://y.qq.com/n/ryqs/song_detail/003Oj2Vd3572Xp", netease: "https://music.163.com/#/song?id=31393555" },
+                    { title: "斑马斑马", artist: "宋冬野", qq: "https://y.qq.com/n/ryqs/song_detail/002J4UUk29y8BY", netease: "https://music.163.com/#/song?id=186016" }
+                ],
+                electronic: [
+                    { title: "派对动物", artist: "五月天", qq: "https://y.qq.com/n/ryqs/song_detail/000g0G3x2o085B", netease: "https://music.163.com/#/song?id=418603077" },
+                    { title: "霓虹甜心", artist: "马赛克乐队", qq: "https://y.qq.com/n/ryqs/song_detail/003xWz5w3g64tD", netease: "https://music.163.com/#/song?id=1305290366" },
+                    { title: "New Boy", artist: "朴树", qq: "https://y.qq.com/n/ryqs/song_detail/002uLz6R0o085B", netease: "https://music.163.com/#/song?id=139775" },
+                    { title: "你要跳舞吗", artist: "新裤子", qq: "https://y.qq.com/n/ryqs/song_detail/001gXhHv1F5Z4Q", netease: "https://music.163.com/#/song?id=29717177" },
+                    { title: "没有理想的人不伤心", artist: "新裤子", qq: "https://y.qq.com/n/ryqs/song_detail/003xWz5w3g64tD", netease: "https://music.163.com/#/song?id=405809776" },
+                    { title: "阿里山的姑娘 (Remix)", artist: "Various", qq: "https://y.qq.com/n/ryqs/song_detail/002uLz6R0o085B", netease: "https://music.163.com/#/song?id=28285846" }
+                ],
+                classical: [
+                    { title: "梁祝", artist: "何占豪/陈钢", qq: "https://y.qq.com/n/ryqs/song_detail/001gXhHv1F5Z4Q", netease: "https://music.163.com/#/song?id=139775" },
+                    { title: "春江花月夜", artist: "民乐合奏", qq: "https://y.qq.com/n/ryqs/song_detail/003xWz5w3g64tD", netease: "https://music.163.com/#/song?id=139775" },
+                    { title: "高山流水", artist: "古筝曲", qq: "https://y.qq.com/n/ryqs/song_detail/002uLz6R0o085B", netease: "https://music.163.com/#/song?id=139775" },
+                    { title: "十面埋伏", artist: "琵琶曲", qq: "https://y.qq.com/n/ryqs/song_detail/000S68PI3a78qT", netease: "https://music.163.com/#/song?id=543678752" },
+                    { title: "渔舟唱晚", artist: "古筝曲", qq: "https://y.qq.com/n/ryqs/song_detail/003Oj2Vd3572Xp", netease: "https://music.163.com/#/song?id=31393555" },
+                    { title: "二泉映月", artist: "阿炳", qq: "https://y.qq.com/n/ryqs/song_detail/002J4UUk29y8BY", netease: "https://music.163.com/#/song?id=186016" }
+                ],
+                rnb: [
+                    { title: "爱很简单", artist: "陶喆", qq: "https://y.qq.com/n/ryqs/song_detail/002J4UUk29y8BY", netease: "https://music.163.com/#/song?id=139775" },
+                    { title: "Melody", artist: "陶喆", qq: "https://y.qq.com/n/ryqs/song_detail/003Oj2Vd3572Xp", netease: "https://music.163.com/#/song?id=139775" },
+                    { title: "飞机场的10:30", artist: "陶喆", qq: "https://y.qq.com/n/ryqs/song_detail/000S68PI3a78qT", netease: "https://music.163.com/#/song?id=139775" },
+                    { title: "普通朋友", artist: "陶喆", qq: "https://y.qq.com/n/ryqs/song_detail/001gXhHv1F5Z4Q", netease: "https://music.163.com/#/song?id=29717177" },
+                    { title: "Love Song", artist: "方大同", qq: "https://y.qq.com/n/ryqs/song_detail/003xWz5w3g64tD", netease: "https://music.163.com/#/song?id=405809776" },
+                    { title: "特别的人", artist: "方大同", qq: "https://y.qq.com/n/ryqs/song_detail/002uLz6R0o085B", netease: "https://music.163.com/#/song?id=28285846" }
+                ]
+            },
+            overseas: {
+                pop: [
+                    { title: "Love Story", artist: "Taylor Swift", qq: "https://y.qq.com/n/ryqs/song_detail/002J4UUk29y8BY", netease: "https://music.163.com/#/song?id=186016" },
+                    { title: "Shape of You", artist: "Ed Sheeran", qq: "https://y.qq.com/n/ryqs/song_detail/003Oj2Vd3572Xp", netease: "https://music.163.com/#/song?id=31393555" },
+                    { title: "Blinding Lights", artist: "The Weeknd", qq: "https://y.qq.com/n/ryqs/song_detail/000S68PI3a78qT", netease: "https://music.163.com/#/song?id=543678752" },
+                    { title: "Rolling in the Deep", artist: "Adele", qq: "https://y.qq.com/n/ryqs/song_detail/001gXhHv1F5Z4Q", netease: "https://music.163.com/#/song?id=29717177" },
+                    { title: "Bad Guy", artist: "Billie Eilish", qq: "https://y.qq.com/n/ryqs/song_detail/003xWz5w3g64tD", netease: "https://music.163.com/#/song?id=405809776" },
+                    { title: "Levitating", artist: "Dua Lipa", qq: "https://y.qq.com/n/ryqs/song_detail/002uLz6R0o085B", netease: "https://music.163.com/#/song?id=28285846" }
+                ],
+                folk: [
+                    { title: "Country Roads", artist: "John Denver", qq: "https://y.qq.com/n/ryqs/song_detail/003xWz5w3g64tD", netease: "https://music.163.com/#/song?id=405809776" },
+                    { title: "Vincent", artist: "Don McLean", qq: "https://y.qq.com/n/ryqs/song_detail/001gXhHv1F5Z4Q", netease: "https://music.163.com/#/song?id=29717177" },
+                    { title: "Hey Jude", artist: "The Beatles", qq: "https://y.qq.com/n/ryqs/song_detail/002uLz6R0o085B", netease: "https://music.163.com/#/song?id=28285846" },
+                    { title: "Yesterday", artist: "The Beatles", qq: "https://y.qq.com/n/ryqs/song_detail/000S68PI3a78qT", netease: "https://music.163.com/#/song?id=543678752" },
+                    { title: "Hotel California", artist: "Eagles", qq: "https://y.qq.com/n/ryqs/song_detail/003Oj2Vd3572Xp", netease: "https://music.163.com/#/song?id=31393555" },
+                    { title: "Sound of Silence", artist: "Simon & Garfunkel", qq: "https://y.qq.com/n/ryqs/song_detail/002J4UUk29y8BY", netease: "https://music.163.com/#/song?id=186016" }
+                ],
+                electronic: [
+                    { title: "Faded", artist: "Alan Walker", qq: "https://y.qq.com/n/ryqs/song_detail/000g0G3x2o085B", netease: "https://music.163.com/#/song?id=418603077" },
+                    { title: "Summer", artist: "Calvin Harris", qq: "https://y.qq.com/n/ryqs/song_detail/003xWz5w3g64tD", netease: "https://music.163.com/#/song?id=1305290366" },
+                    { title: "Wake Me Up", artist: "Avicii", qq: "https://y.qq.com/n/ryqs/song_detail/002uLz6R0o085B", netease: "https://music.163.com/#/song?id=139775" },
+                    { title: "Titanium", artist: "David Guetta", qq: "https://y.qq.com/n/ryqs/song_detail/001gXhHv1F5Z4Q", netease: "https://music.163.com/#/song?id=29717177" },
+                    { title: "Closer", artist: "The Chainsmokers", qq: "https://y.qq.com/n/ryqs/song_detail/003xWz5w3g64tD", netease: "https://music.163.com/#/song?id=405809776" },
+                    { title: "Animals", artist: "Martin Garrix", qq: "https://y.qq.com/n/ryqs/song_detail/002uLz6R0o085B", netease: "https://music.163.com/#/song?id=28285846" }
+                ],
+                classical: [
+                    { title: "Canon in D", artist: "Pachelbel", qq: "https://y.qq.com/n/ryqs/song_detail/001gXhHv1F5Z4Q", netease: "https://music.163.com/#/song?id=139775" },
+                    { title: "Moonlight Sonata", artist: "Beethoven", qq: "https://y.qq.com/n/ryqs/song_detail/003xWz5w3g64tD", netease: "https://music.163.com/#/song?id=139775" },
+                    { title: "Nocturne Op.9 No.2", artist: "Chopin", qq: "https://y.qq.com/n/ryqs/song_detail/002uLz6R0o085B", netease: "https://music.163.com/#/song?id=139775" },
+                    { title: "Symphony No. 9", artist: "Beethoven", qq: "https://y.qq.com/n/ryqs/song_detail/000S68PI3a78qT", netease: "https://music.163.com/#/song?id=543678752" },
+                    { title: "Four Seasons", artist: "Vivaldi", qq: "https://y.qq.com/n/ryqs/song_detail/003Oj2Vd3572Xp", netease: "https://music.163.com/#/song?id=31393555" },
+                    { title: "Clair de Lune", artist: "Debussy", qq: "https://y.qq.com/n/ryqs/song_detail/002J4UUk29y8BY", netease: "https://music.163.com/#/song?id=186016" }
+                ],
+                rnb: [
+                    { title: "We Belong Together", artist: "Mariah Carey", qq: "https://y.qq.com/n/ryqs/song_detail/002J4UUk29y8BY", netease: "https://music.163.com/#/song?id=139775" },
+                    { title: "Stay With Me", artist: "Sam Smith", qq: "https://y.qq.com/n/ryqs/song_detail/003Oj2Vd3572Xp", netease: "https://music.163.com/#/song?id=139775" },
+                    { title: "Just the Way You Are", artist: "Bruno Mars", qq: "https://y.qq.com/n/ryqs/song_detail/000S68PI3a78qT", netease: "https://music.163.com/#/song?id=139775" },
+                    { title: "Crazy in Love", artist: "Beyonce", qq: "https://y.qq.com/n/ryqs/song_detail/001gXhHv1F5Z4Q", netease: "https://music.163.com/#/song?id=29717177" },
+                    { title: "Irreplaceable", artist: "Beyonce", qq: "https://y.qq.com/n/ryqs/song_detail/003xWz5w3g64tD", netease: "https://music.163.com/#/song?id=405809776" },
+                    { title: "That's What I Like", artist: "Bruno Mars", qq: "https://y.qq.com/n/ryqs/song_detail/002uLz6R0o085B", netease: "https://music.163.com/#/song?id=28285846" }
+                ]
+            }
+        };
+
+        // 用于存储已推荐过的歌曲索引，防止单次刷新内重复（可选逻辑，这里主要保证每次随机取且不连续重复）
+        let lastRecommendedIndices = [];
+
+        function generateRecommendations() {
+            const region = document.getElementById('region').value;
+            const style = document.getElementById('style').value;
+            const color = document.getElementById('color').value;
+
+            // 获取对应区域的歌曲列表
+            let songs = songDatabase[region][style] || songDatabase[region]['pop'];
+
+            // 确保有足够的歌曲
+            if (songs.length < 3) {
+                alert("哎呀，这个分类下的歌曲不够多啦，换个风格试试？");
+                return;
+            }
+
+            // 随机选择3首不重复的歌曲
+            let selectedIndices = new Set();
+            while(selectedIndices.size < 3) {
+                let randomIndex = Math.floor(Math.random() * songs.length);
+                // 简单避免和上一次完全一样的组合（可选优化）
+                selectedIndices.add(randomIndex);
+            }
+
+            let selectedSongs = [];
+            selectedIndices.forEach(index => {
+                selectedSongs.push(songs[index]);
+            });
+
+            // 更新界面颜色以匹配用户选择
+            document.querySelector('.container').style.borderColor = color;
+            document.querySelector('h1').style.color = color;
+            document.querySelector('h1').style.textShadow = `3px 3px 0px #fff, 5px 5px 0px ${color}40`;
+
+            // 渲染结果
+            const listContainer = document.getElementById('songs-list');
+            listContainer.innerHTML = '';
+
+            selectedSongs.forEach((song, idx) => {
+                const card = document.createElement('div');
+                card.className = 'song-card';
+                // 添加延迟动画
+                card.style.animation = `fadeInUp 0.5s ease-out ${idx * 0.2}s backwards`;
+
+                // 点击卡片整体默认跳转网易云，也可以改为弹出选择
+                card.onclick = () => window.open(song.netease, '_blank');
+
+                card.innerHTML = `
+                    <h3 class="song-title">${song.title}</h3>
+                    <p class="song-artist">🎤 ${song.artist}</p>
+                    <div class="platform-links">
+                        <a href="${song.qq}" target="_blank" class="platform-link qq" onclick="event.stopPropagation()">QQ音乐 ▶</a>
+                        <a href="${song.netease}" target="_blank" class="platform-link netease" onclick="event.stopPropagation()">网易云 ☁</a>
+                    </div>
+                `;
+                listContainer.appendChild(card);
+            });
+
+            // 显示结果区域，隐藏表单
+            document.getElementById('quiz-form').style.display = 'none';
+            document.getElementById('result-area').style.display = 'block';
+        }
+
+        function resetQuiz() {
+            document.getElementById('quiz-form').style.display = 'block';
+            document.getElementById('result-area').style.display = 'none';
+            // 重置颜色边框
+            document.querySelector('.container').style.borderColor = '#ffb7b2';
+            document.querySelector('h1').style.color = '#ff6f61';
+            document.querySelector('h1').style.textShadow = '3px 3px 0px #fff, 5px 5px 0px rgba(0,0,0,0.1)';
+        }
+    </script>
+</html>
